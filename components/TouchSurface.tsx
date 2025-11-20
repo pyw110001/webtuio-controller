@@ -6,6 +6,7 @@ interface TouchSurfaceProps {
   settings: AppSettings;
   socket: WebSocket | null;
   onExit: () => void;
+  onLogout: () => void;
 }
 
 interface VisualCursor {
@@ -14,7 +15,7 @@ interface VisualCursor {
   y: number; // screen px
 }
 
-const TouchSurface: React.FC<TouchSurfaceProps> = ({ settings, socket, onExit }) => {
+const TouchSurface: React.FC<TouchSurfaceProps> = ({ settings, socket, onExit, onLogout }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const cursorsRef = useRef<Map<string, TuioCursor>>(new Map());
   const [visualCursors, setVisualCursors] = useState<VisualCursor[]>([]);
@@ -52,10 +53,10 @@ const TouchSurface: React.FC<TouchSurfaceProps> = ({ settings, socket, onExit })
         const messages: OSCMessage[] = [];
         messages.push(TuioService.createSourceMessage());
         
-        // 发送所有活动cursor的set消息
-        cursorsRef.current.forEach((cursor) => {
-          messages.push(TuioService.createSetMessage(cursor));
-        });
+      // 发送所有活动cursor的set消息
+      cursorsRef.current.forEach((cursor) => {
+        messages.push(TuioService.createSetMessage(cursor, settings.coordinateScale));
+      });
         
         const activeSessionIds = Array.from(cursorsRef.current.values()).map((c: TuioCursor) => c.sessionId);
         messages.push(TuioService.createAliveMessage(activeSessionIds));
@@ -125,7 +126,7 @@ const TouchSurface: React.FC<TouchSurfaceProps> = ({ settings, socket, onExit })
 
       // 根据TUIO标准，Bundle中应该包含所有活动cursor的set消息
       currentCursors.forEach((cursor) => {
-        messages.push(TuioService.createSetMessage(cursor));
+        messages.push(TuioService.createSetMessage(cursor, settings.coordinateScale));
       });
 
       const activeSessionIds = Array.from(currentCursors.values()).map((c: TuioCursor) => c.sessionId);
@@ -164,10 +165,10 @@ const TouchSurface: React.FC<TouchSurfaceProps> = ({ settings, socket, onExit })
       const messages: OSCMessage[] = [];
       messages.push(TuioService.createSourceMessage());
       
-      // 发送所有活动cursor的set消息
-      currentCursors.forEach((cursor) => {
-        messages.push(TuioService.createSetMessage(cursor));
-      });
+        // 发送所有活动cursor的set消息
+        currentCursors.forEach((cursor) => {
+          messages.push(TuioService.createSetMessage(cursor, settings.coordinateScale));
+        });
       
       const activeSessionIds = Array.from(currentCursors.values()).map((c: TuioCursor) => c.sessionId);
       messages.push(TuioService.createAliveMessage(activeSessionIds));
@@ -217,7 +218,7 @@ const TouchSurface: React.FC<TouchSurfaceProps> = ({ settings, socket, onExit })
         
         // 发送所有活动cursor的set消息
         currentCursors.forEach((cursor) => {
-          messages.push(TuioService.createSetMessage(cursor));
+          messages.push(TuioService.createSetMessage(cursor, settings.coordinateScale));
         });
         
         const activeSessionIds = Array.from(currentCursors.values()).map((c: TuioCursor) => c.sessionId);
@@ -303,14 +304,22 @@ const TouchSurface: React.FC<TouchSurfaceProps> = ({ settings, socket, onExit })
       </div>
 
       {/* Connection Status Indicator (Top Right) */}
-      <div className="absolute top-4 right-4 flex flex-col items-end space-y-2 pointer-events-none">
-        <div className="flex items-center space-x-2 bg-slate-900/80 px-3 py-1 rounded-full border border-slate-700 backdrop-blur text-xs">
-          <span className={`w-2 h-2 rounded-full ${socket?.readyState === WebSocket.OPEN ? 'bg-green-500 animate-pulse' : 'bg-slate-400'}`}></span>
-          <span className="text-slate-300 font-mono">
-            {socket ? `${settings.host}:${settings.port}` : 'OFFLINE MODE'}
-          </span>
+      <div className="absolute top-4 right-4 flex flex-col items-end space-y-2">
+        <div className="flex items-center space-x-2 pointer-events-auto">
+          <button
+            onClick={onLogout}
+            className="bg-slate-800/50 hover:bg-slate-700 text-slate-200 border border-slate-600 px-3 py-1 rounded-lg text-xs backdrop-blur transition mr-2"
+          >
+            ← 返回登录
+          </button>
+          <div className="flex items-center space-x-2 bg-slate-900/80 px-3 py-1 rounded-full border border-slate-700 backdrop-blur text-xs pointer-events-none">
+            <span className={`w-2 h-2 rounded-full ${socket?.readyState === WebSocket.OPEN ? 'bg-green-500 animate-pulse' : 'bg-slate-400'}`}></span>
+            <span className="text-slate-300 font-mono">
+              {socket ? `${settings.host}:${settings.port}` : 'OFFLINE MODE'}
+            </span>
+          </div>
         </div>
-        <div className="text-[10px] text-slate-500">TUIO 1.1 | {visualCursors.length} OBJ</div>
+        <div className="text-[10px] text-slate-500 pointer-events-none">TUIO 1.1 | {visualCursors.length} OBJ</div>
       </div>
 
       {/* Control Overlay (Bottom Left - pointer events allowed) */}

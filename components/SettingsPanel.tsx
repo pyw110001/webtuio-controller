@@ -6,15 +6,24 @@ interface SettingsPanelProps {
   onSave: (newSettings: AppSettings) => void;
   onStart: () => void;
   onOffline: () => void;
+  onLogout: () => void;
 }
 
-const SettingsPanel: React.FC<SettingsPanelProps> = ({ settings, onSave, onStart, onOffline }) => {
+const SettingsPanel: React.FC<SettingsPanelProps> = ({ settings, onSave, onStart, onOffline, onLogout }) => {
   const handleChange = (field: keyof AppSettings, value: any) => {
     onSave({ ...settings, [field]: value });
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen w-full p-6 bg-tuio-900 text-tuio-100">
+    <div className="flex flex-col items-center justify-center min-h-screen w-full p-6 bg-tuio-900 text-tuio-100 relative">
+      {/* 返回按钮 - 右上角 */}
+      <button
+        onClick={onLogout}
+        className="absolute top-6 right-6 bg-slate-800/50 hover:bg-slate-700 text-slate-200 border border-slate-600 px-4 py-2 rounded-lg text-sm backdrop-blur transition z-50"
+      >
+        ← 返回登录
+      </button>
+      
       <div className="w-full max-w-md bg-tuio-800 border border-slate-700 rounded-xl shadow-2xl p-8">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-white mb-2">WebTUIO</h1>
@@ -107,17 +116,20 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ settings, onSave, onStart
                 </button>
              </div>
 
-             <div className="flex items-center justify-between p-2 hover:bg-slate-700/50 rounded transition">
-                <div>
-                  <span className="text-sm">Invert Y Axis</span>
-                  <p className="text-[10px] text-slate-500">反转Y轴坐标（某些应用需要）</p>
-                </div>
-                <button
-                  onClick={() => handleChange('invertY', !settings.invertY)}
-                  className={`w-10 h-5 rounded-full relative transition-colors ${settings.invertY ? 'bg-tuio-500' : 'bg-slate-600'}`}
-                >
-                  <div className={`w-3 h-3 bg-white rounded-full absolute top-1 transition-all ${settings.invertY ? 'left-6' : 'left-1'}`} />
-                </button>
+             <div className="space-y-2">
+                <label className="block text-xs mb-1 text-slate-400">Coordinate Scale</label>
+                <input
+                  type="number"
+                  value={settings.coordinateScale}
+                  onChange={(e) => handleChange('coordinateScale', parseFloat(e.target.value) || 1.0)}
+                  min="0.1"
+                  max="10000"
+                  step="0.1"
+                  className="w-full bg-slate-900 border border-slate-600 rounded px-3 py-2 text-white focus:ring-2 focus:ring-tuio-500 outline-none transition"
+                />
+                <p className="text-[10px] text-slate-500">
+                  坐标缩放因子：1.0=归一化(0-1)，1920=像素宽度，1080=像素高度
+                </p>
              </div>
           </div>
 

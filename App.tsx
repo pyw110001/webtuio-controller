@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import SettingsPanel from './components/SettingsPanel';
 import TouchSurface from './components/TouchSurface';
+import LoginPage from './components/LoginPage';
 import { AppSettings } from './types';
 import { DEFAULT_SETTINGS, STORAGE_KEY } from './constants';
 
 const App: React.FC = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
   const [socket, setSocket] = useState<WebSocket | null>(null);
@@ -102,6 +104,19 @@ const App: React.FC = () => {
     }
   }, [socket]);
 
+  // 返回登录页面
+  const handleLogout = useCallback(() => {
+    // 先停止当前连接
+    handleStop();
+    // 返回登录页面
+    setIsLoggedIn(false);
+  }, [handleStop]);
+
+  // 如果未登录，显示登录页面
+  if (!isLoggedIn) {
+    return <LoginPage onLogin={() => setIsLoggedIn(true)} />;
+  }
+
   return (
     <div className="w-full h-full text-sans bg-slate-950">
       {!isRunning ? (
@@ -111,6 +126,7 @@ const App: React.FC = () => {
             onSave={handleSaveSettings} 
             onStart={handleStart}
             onOffline={handleOffline}
+            onLogout={handleLogout}
           />
           {errorMsg && (
             <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-11/12 max-w-md bg-red-500/90 text-white px-6 py-4 rounded-xl shadow-xl z-50 border border-red-400/50 backdrop-blur-sm flex items-center">
@@ -129,7 +145,8 @@ const App: React.FC = () => {
         <TouchSurface 
           settings={settings} 
           socket={socket} 
-          onExit={handleStop} 
+          onExit={handleStop}
+          onLogout={handleLogout}
         />
       )}
     </div>

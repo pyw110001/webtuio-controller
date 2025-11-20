@@ -43,16 +43,16 @@ export const createFseqMessage = (): OSCMessage => {
  * TUIO 1.1 2Dcur: /tuio/2Dcur set s x y X Y m
  * s: sessionID, x/y: position, X/Y: velocity, m: accel
  */
-export const createSetMessage = (cursor: TuioCursor): OSCMessage => ({
+export const createSetMessage = (cursor: TuioCursor, coordinateScale: number = 1.0): OSCMessage => ({
   address: TUIO_PROFILE,
   args: [
     'set',
     Math.floor(cursor.sessionId), // 确保session ID是整数
-    Number(cursor.x), // 确保是数字类型
-    Number(cursor.y),
-    Number(cursor.vx),
-    Number(cursor.vy),
-    Number(cursor.a)
+    Number(cursor.x * coordinateScale), // 应用坐标缩放
+    Number(cursor.y * coordinateScale),
+    Number(cursor.vx * coordinateScale), // 速度也需要缩放
+    Number(cursor.vy * coordinateScale),
+    Number(cursor.a * coordinateScale) // 加速度也需要缩放
   ],
 });
 

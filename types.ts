@@ -11,6 +11,7 @@ export interface AppSettings {
   fullBundle: boolean;
   blobMessages: boolean;
   invertY: boolean; // 反转Y轴（某些应用程序期望Y=0在底部）
+  coordinateScale: number; // 坐标缩放因子（默认1.0，表示0-1归一化坐标）
 }
 
 export interface TuioCursor {
