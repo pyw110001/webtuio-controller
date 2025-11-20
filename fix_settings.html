@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>修复 WebTUIO 设置</title>
+    <meta charset="utf-8">
+</head>
+<body>
+    <h1>修复 WebTUIO 设置</h1>
+    <p>点击下面的按钮来清除保存的设置并重置为默认值：</p>
+    <button onclick="fixSettings()" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">
+        清除设置并重置
+    </button>
+    <div id="result" style="margin-top: 20px;"></div>
+    
+    <script>
+        function fixSettings() {
+            try {
+                // 清除保存的设置
+                localStorage.removeItem('webtuio_settings_v1');
+                
+                // 设置默认值
+                const defaultSettings = {
+                    host: '127.0.0.1',
+                    port: 8080,
+                    protocol: 'UDP_BRIDGE',
+                    periodicUpdates: true,
+                    fullBundle: true,
+                    blobMessages: false
+                };
+                
+                localStorage.setItem('webtuio_settings_v1', JSON.stringify(defaultSettings));
+                
+                document.getElementById('result').innerHTML = 
+                    '<p style="color: green;">✓ 设置已重置！</p>' +
+                    '<p>默认配置：</p>' +
+                    '<ul>' +
+                    '<li>Host: 127.0.0.1</li>' +
+                    '<li>Port: 8080</li>' +
+                    '</ul>' +
+                    '<p>现在可以返回主页面，端口应该已经正确设置为 8080。</p>';
+            } catch (e) {
+                document.getElementById('result').innerHTML = 
+                    '<p style="color: red;">错误: ' + e.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html>
+

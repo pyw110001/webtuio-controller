@@ -1,0 +1,5 @@
+{
+  "name": "WebTUIO Controller",
+  "description": "A web-based OSC/TUIO 1.1 interaction controller. Converts multi-touch events into TUIO messages sent via WebSocket.",
+  "requestFramePermissions": []
+}
